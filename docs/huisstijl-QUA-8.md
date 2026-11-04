@@ -270,8 +270,72 @@ Acceptatiecriteria:
 |---|---|---|
 | 1 | Hexwaarden bevestigen (§1) | Jori — klantcontact |
 | 2 | Contrastbesluit (a) of (b) + wie het bevestigde (§3) | Jori — klantcontact |
-| 3 | Scope `/admin` wel/niet, en donkere modus (§4) | Jori — klantcontact |
+| 3 | Scope `/admin` wel/niet (§4) | Jori — klantcontact |
 | 4 | **Billingcode van de klant** — staat nergens in QUA-7/QUA-8 en is niet uit de repo af te leiden | Jori |
-| 5 | Ticket-ID's van T1/T2/T3 — de omschrijving verwijst naar "de drie tickets hieronder", maar er staan geen verwijzingen in | Jori |
 
 Punt 2 uit §2 (Comic Sans-licentie) is afgerond en vraagt geen klantbesluit.
+Punt 5 uit de eerdere versie (ontbrekende ticket-ID's) is opgelost — zie §7.
+De sub-vraag over de donkere modus is eveneens gesloten — zie §8.
+
+---
+
+## 7. Ticket-ID's — aangeleverd via de standup van 4 november
+
+De standup noemt de drie geblokkeerde tickets: **QUA-9**, **QUA-10** en **QUA-11**.
+QUA-9 en QUA-10 hangen direct op QUA-8, QUA-11 daarachter.
+Klant is **TEPNL**.
+
+**Let op bij toepassen:** ik kan de titels van QUA-9/10/11 niet lezen — deze runtime heeft
+geen Paperclip-API (apart geregistreerd op **QUA-14**). Ik weet dus wél dat dit de drie
+tickets zijn, maar **niet** welk ID bij welk werkitem hoort. Wie dit toepast moet T1/T2/T3
+uit §5 op titel matchen, niet op volgorde. Gok niet op nummervolgorde:
+
+- **T1** — publieke pagina: tokens, font-stack en Vite-koppeling (0,5 dag, high, Timo's agent)
+- **T2** — Comic Neue als webfont via Bunny (0,25 dag, high, Matthijs's agent)
+- **T3** — Orchid-adminpanel rebranden (0,5 dag, medium, Timo's agent)
+
+Dat QUA-11 "daarachter" hangt past bij T3: het adminpanel is het enige ticket dat kan
+vervallen, afhankelijk van de scope-beslissing in §4. Dat is een aanwijzing, geen bevestiging.
+
+---
+
+## 8. Donkere modus — gesloten, geen klantvraag meer
+
+De standup stelt dat deze sub-vraag nu al te beantwoorden is. Dat klopt, en het antwoord is
+beter dan "voorleggen aan de klant".
+
+Geverifieerd in `public/vendor/orchid/css/orchid.css`:
+
+- `prefers-color-scheme` komt **0 keer** voor. De donkere modus volgt dus **niet** de
+  OS-voorkeur en gaat nooit vanzelf aan.
+- `[data-bs-theme=dark]` definieert wél een volledig tokenblok
+  (`--bs-body-bg:#212529`, `--bs-body-color:#dee2e6`, `--bs-emphasis-color:#fff`, …).
+  Zodra iets dat attribuut zet, krijgt de gebruiker de **ongebrande** donkere variant.
+
+Of Orchid 14.53 een gebruikersschakelaar heeft die dat attribuut zet, kon ik hier niet
+nagaan: `vendor/` is in deze workspace niet geïnstalleerd, dus de Blade-templates van Orchid
+zijn er niet. Dat is precies waarom "weten we het zeker?" de verkeerde vraag is.
+
+**Besluit (implementatiekeuze, geen merkbeslissing — valt binnen de refinement-gate):**
+de override-stylesheet van T3 zet de merktokens op **beide** selectors:
+
+```css
+:root,
+[data-bs-theme=light],
+[data-bs-theme=dark] { /* merktokens */ }
+```
+
+Daarmee is het irrelevant of de schakelaar bestaat: geen enkele gebruiker kan op een
+ongebrand panel uitkomen. De kosten zijn nul — het is dezelfde declaratie met een extra
+selector. Het gevolg is dat de donkere modus in het panel feitelijk verdwijnt; wil TEPNL
+later een echte donkere variant van de huisstijl, dan is dat een nieuw ticket, geen
+uitbreiding van T3.
+
+De AC van T3 in §5 vervangt daarmee "Besloten en vastgelegd of `[data-bs-theme=dark]`
+meegaat" door:
+
+- [ ] De merktokens staan op `:root`, `[data-bs-theme=light]` **en** `[data-bs-theme=dark]`
+- [ ] Het panel is in beide thema's bekeken en is in geen van beide ongebrand
+
+Dit haalt géén van de vier klantvragen weg — het haalt een sub-vraag weg die anders bij de
+klant was beland.
